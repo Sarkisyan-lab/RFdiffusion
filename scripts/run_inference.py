@@ -97,7 +97,8 @@ def main(conf: HydraConfig) -> None:
             px0, x_t, seq_t, plddt = sampler.sample_step(
                 t=t, x_t=x_t, seq_init=seq_t, final_step=sampler.inf_conf.final_step
             )
-            px0_xyz_stack.append(px0)
+            if sampler.inf_conf.write_trajectory:
+                px0_xyz_stack.append(px0)
             denoised_xyz_stack.append(x_t)
             seq_stack.append(seq_t)
             plddt_stack.append(plddt[0])  # remove singleton leading dimension
@@ -109,13 +110,13 @@ def main(conf: HydraConfig) -> None:
                 0,
             ],
         )
-
-        px0_xyz_stack = torch.flip(
-            torch.stack(px0_xyz_stack),
-            [
-                0,
-            ],
-        )
+        if sampler.inf_conf.write_trajectory:
+            px0_xyz_stack = torch.flip(
+                torch.stack(px0_xyz_stack),
+                [
+                    0,
+                ],
+            )
 
         # For logging -- don't flip
         plddt_stack = torch.stack(plddt_stack)
